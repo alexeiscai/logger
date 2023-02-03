@@ -2,29 +2,28 @@
 #include <windows.h>
 #include <filesystem>
 
-Logger Logger::logger_ = Logger();
-
-Logger::Logger() {
-};
-
-Logger &Logger::getInstance()
+Logger* Logger::getInstance()
 {
+    if (logger_ == nullptr)
+    {
+        logger_ = new Logger();
+    }
     return logger_;
 }
 
 void Logger::log(const std::string &log)
 {
-    Logger::getInstance().mLogs_.lock();
-    Logger::getInstance().logs_.push(log);
-    Logger::getInstance().mLogs_.unlock();
+   mLogs_.lock();
+   logs_.push(log);
+   mLogs_.unlock();
 }
 
 void Logger::flush()
 {
     std::cout<< "Flush "<< logs_.size() << " logs "<< std::endl; 
-    while (!Logger::getInstance().logs_.empty())
+    while (!logs_.empty())
     {
-        Logger::getInstance().logs_.pop();
+        logs_.pop();
     }
 }
 
@@ -33,19 +32,19 @@ void Logger::writeLogs()
     char filename[MAX_PATH];
     DWORD size = GetModuleFileNameA( NULL, filename, MAX_PATH );
     
-    Logger::getInstance().running_ = true;
+    running_ = true;
 
-    while(Logger::getInstance().running_)
+    while(running_)
     {
-        if(Logger::getInstance().logs_.size() > 10)
+        if(logs_.size() > 10)
         {   
             std::cout<< "-------------"<< std::endl;;
             std::cout << filename << " : 10 logs block follows: "<< std::endl;
             std::cout<< "-------------"<< std::endl;
             for(int i = 0; i < 10; i++)
             {
-            std::cout<< Logger::getInstance().logs_.front() << std::endl;
-            Logger::getInstance().logs_.pop();
+              std::cout<< logs_.front() << std::endl;
+              logs_.pop();
             }
             std::cout<< "-------------"<< std::endl;
         }
@@ -55,7 +54,7 @@ void Logger::writeLogs()
 
 void Logger::stop()
 {
-    Logger::getInstance().mRun_.lock();
-    Logger::getInstance().running_ = false;
-    Logger::getInstance().mRun_.unlock();
+    mRun_.lock();
+    running_ = false;
+    mRun_.unlock();
 }

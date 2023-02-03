@@ -10,12 +10,13 @@
 class Logger
 {
 
-private:  
+protected:
+Logger(){}
 
-    Logger();
-    
-    /* Logger object */
-    static Logger logger_;
+  /* Logger object */
+    static Logger* logger_;
+
+private:  
 
     /* Stoop condition */
     bool running_;
@@ -31,16 +32,8 @@ private:
 
 public:
 
-/**
- * @brief Get the Instance of Logger class.
- * 
- * @return Logger& addres for current instance.
- */
-static Logger &getInstance();
 
-Logger(Logger &other) = delete;
-
-void operator=(const Logger &) = delete;
+static Logger* getInstance();
 
 /**
  * @brief Method push log into queue.

@@ -1,23 +1,23 @@
 #include "logger.h"
 #include <unistd.h>
 
-void displayLogs()
-{
-    std::thread thr(&Logger::writeLogs, &Logger::getInstance());
+Logger* Logger ::logger_ = NULL;
 
-     for(int i = 0; i < 100; i++)
-    {
-        Logger::getInstance().log("Test log---->");
-    }
-    
-    usleep(1000);
-    Logger::getInstance().stop();
-    thr.join();
-}
 
 int main()
-{
-    displayLogs();
+{   
+    Logger* loggerObj = Logger::getInstance();
+
+    std::thread thr(&Logger::writeLogs, loggerObj);
+
+    for(int i = 0; i < 1000; i++)
+    {
+        loggerObj->log("Test log---->");
+    }
+    
+    usleep(500);
+    loggerObj->stop();
+    thr.join();
 
     return 0;
 }
