@@ -7,91 +7,118 @@
 class Logger
 {
 protected:
-    Logger(){}
-    
-    static Logger* logger_;
+    Logger() {}
 
-private:  
-  
+    /* Logger object */
+    static Logger *logger_;
+
+private:
+    /* Stop condition */
     bool running;
-    std::queue<std::string > logs;
-  
-    std::mutex m_logs;
-    std::mutex m_run;
-    
+
+    /* Queue of logs in string format */
+    std::queue<std::string> logs;
+
+    /* mutex used in log method */
+    std::mutex mLogs_;
+
+    /* mutex used in stop method which updates running_ flag */
+    std::mutex mRun_;
+
+    /**
+     * @brief Flush  logs.
+     *
+     */
     void flush()
     {
-        std::cout<< "Flush queue:"<< logs.size() << " logs "<< std::endl; 
+        std::cout << "Flush queue:" << logs.size() << " logs " << std::endl;
         while (!logs.empty())
         {
             logs.pop();
         }
     }
-    
-public:
 
-    static Logger* getInstance()
-    {   
+public:
+    /**
+     * @brief Get the Instance object
+     *
+     * @return Logger object.
+     */
+    static Logger *getInstance()
+    {
         if (logger_ == NULL)
         {
             logger_ = new Logger();
         }
         return logger_;
     }
-    
+
+    /**
+     * @brief Method push logs into queue.
+     *
+     * @param log Log message of type string.
+     */
     void log(std::string log)
-  {
-      m_logs.lock();
-      logs.push(log);
-      m_logs.unlock();
-  }
-    
+    {
+        mLogs_.lock();
+        logs.push(log);
+        mLogs_.unlock();
+    }
+
+    /**
+     * @brief Display logs in block of 10.
+     *
+     */
     void writeLogs()
-  {
+    {
         running = true;
 
-          while(running)
-          {
-            if(logs.size() > 10)
+        while (running)
+        {
+            if (logs.size() > 10)
             {
-               std::cout<< "-------Block of 10 logs------"<< std::endl;;
-                for(int i = 0; i < 10; i++)
+                std::cout << "-------Block of 10 logs------" << std::endl;
+                ;
+                for (int i = 0; i < 10; i++)
                 {
-                    std::cout<< logs.front() << std::endl;
+                    std::cout << logs.front() << std::endl;
                     logs.pop();
                 }
-             std::cout<< "-------------"<< std::endl;;
+                std::cout << "-------------" << std::endl;
+                ;
             }
-          }
-          flush();
-  
-  }
-  
-  void stop()
-  {
-      m_run.lock();
-      running = false;
-      m_run.unlock();
-  }
+        }
+        flush();
+    }
 
+    /**
+     * @brief Set stop condition if logs already displayed.
+     *
+     */
+    void stop()
+    {
+        mRun_.lock();
+        running = false;
+        mRun_.unlock();
+    }
 };
 
-Logger* Logger ::logger_ = NULL;
+Logger *Logger::logger_ = NULL;
 
+int main()
+{
+    Logger *loggerObj = Logger::getInstance();
 
-int main() {
-    Logger* loggerObj = Logger::getInstance();
-    
     std::thread thr(&Logger::writeLogs, loggerObj);
-    
-    for(int i = 0; i < 1000; i++)
+
+    for (int i = 0; i < 1000; i++)
     {
         loggerObj->log("LOG--->");
     }
-    
+
     usleep(500);
     loggerObj->stop();
     thr.join();
-    
+
     return 0;
 }

@@ -17,7 +17,7 @@ protected:
     static Logger *logger_;
 
 private:
-    /* Stoop condition */
+    /* Stop condition */
     bool running_;
 
     /* Queue of logs in string format */
