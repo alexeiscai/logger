@@ -1,20 +1,19 @@
 #include "logger.h"
 #include <unistd.h>
 
-Logger* Logger ::logger_ = NULL;
-
+Logger *Logger::logger_ = nullptr;
 
 int main()
-{   
-    Logger* loggerObj = Logger::getInstance();
+{
+    Logger *loggerObj = Logger::getInstance();
 
     std::thread thr(&Logger::writeLogs, loggerObj);
 
-    for(int i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         loggerObj->log("Test log---->");
     }
-    
+
     usleep(500);
     loggerObj->stop();
     thr.join();

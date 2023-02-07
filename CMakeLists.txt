@@ -7,6 +7,6 @@ include_directories(inc)
 
 add_library(logger SHARED src/logger.cpp)
 
-add_executable(loggerApp main.cpp)
-target_compile_features(loggerApp PRIVATE cxx_std_17)
-target_link_libraries(loggerApp logger)
+add_executable(logApp main.cpp)
+target_compile_features(logApp PRIVATE cxx_std_17)
+target_link_libraries(logApp logger)
